@@ -10,7 +10,7 @@ namespace Tuan4_LeTrungKien.Controllers
 {
     public class HomeController : Controller
     {
-        NhaSachDataContext db = new NhaSachDataContext();
+        DataClasses1DataContext db = new DataClasses1DataContext();
 
         public ActionResult Index(int? page)
         {

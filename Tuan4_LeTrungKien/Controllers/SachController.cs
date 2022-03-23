@@ -11,7 +11,7 @@ namespace Tuan4_LeTrungKien.Controllers
 
     public class SachController : Controller
     {
-        NhaSachDataContext db = new NhaSachDataContext();
+        DataClasses1DataContext db = new DataClasses1DataContext();
         public ActionResult ListSach()
         {
             var all_sach = from ss in db.Saches select ss;

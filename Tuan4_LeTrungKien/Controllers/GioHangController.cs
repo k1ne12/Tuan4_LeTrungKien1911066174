@@ -10,7 +10,7 @@ namespace Tuan4_LeTrungKien.Controllers
     public class GioHangController : Controller
     {
         // GET: GioHang
-        NhaSachDataContext db = new NhaSachDataContext();
+        DataClasses1DataContext db = new DataClasses1DataContext();
         public List<GioHang> Laygiohang()
         {
             List<GioHang> listGiohang = Session["GioHang"] as List<GioHang>;
@@ -121,6 +121,62 @@ namespace Tuan4_LeTrungKien.Controllers
             List<GioHang> ListGioHang = Laygiohang();
             ListGioHang.Clear();
             return RedirectToAction("GioHang");
+        }
+
+        [HttpGet]
+        public ActionResult DatHang()
+        {
+            if (Session["TaiKhoan"] == null || Session["TaiKhoan"].ToString() == "")
+            {
+                return RedirectToAction("DangNhap","NguoiDung");
+            }
+            if (Session["Giohang"] == null)
+            {
+                return RedirectToAction("Index", "Sach");
+            }
+            List<GioHang> listGioHang = Laygiohang();
+            ViewBag.Tongsoluong = TongSoLuong();
+            ViewBag.Tongtien = TongTien();
+            ViewBag.Tongsoluongsanpham = TongSoLuongSanPham();
+            return View(listGioHang);
+        }
+        public ActionResult DatHang(FormCollection collection)
+        {
+            DonHang dh = new DonHang();
+            KhachHang kh = (KhachHang)Session["TaiKhoan"];
+            Sach s = new Sach();
+
+            List<GioHang> gh = Laygiohang();
+            var ngaygiao = String.Format("{0:MM/dd/yyyy }", collection["NgayGiao"]);
+
+            dh.makh = kh.makh;
+            dh.ngaydat = DateTime.Now;
+            dh.ngaygiao = DateTime.Parse(ngaygiao);
+            dh.giaohang = false;
+            dh.thanhtoan = false;
+
+            db.DonHangs.InsertOnSubmit(dh);
+            db.SubmitChanges();
+            foreach(var item in gh)
+            {
+                ChiTietDonHang ctdh = new ChiTietDonHang();
+                ctdh.madon = dh.madon;
+                ctdh.masach = item.masach;
+                ctdh.soluong = item.iSoluong;
+                ctdh.gia =(decimal)item.giaban;
+                s = db.Saches.Single(n => n.masach == item.masach);
+                s.soluongton -= ctdh.soluong;
+                db.SubmitChanges();
+                db.ChiTietDonHangs.InsertOnSubmit(ctdh);
+            }
+            db.SubmitChanges();
+            Session["Giohang"] = null;
+            return RedirectToAction("XacnhanDonhang", "GioHang");
+
+        }
+        public ActionResult XacnhanDonhang()
+        {
+            return View();
         }
             
     }
